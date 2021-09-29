@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf8">
+	<title>Flashpoint Roller</title>
+	<style>
+	.expand-control {
+		cursor: pointer;
+		user-select: none;
+	}
+
+	.expand-icon {
+		font-family: monospace;
+	}
+
+	div[aria-expanded='false'] {
+		display: none !important;
+	}
+
+	.section > * {
+		margin: 1em;
+	}
+
+	.die {
+		border: thin solid darkgrey;
+		border-radius: 0.5rem;
+		font-size: 2rem;
+		color: white;
+		display: grid;
+		align-items: center;
+		justify-items: center;
+		width: 3rem;
+		height: 3rem;
+	}
+
+	.die.red {
+		background-color: red;
+	}
+
+	.die.black {
+		background-color: black;
+	}
+
+	#bare-dice-section {
+		display: grid;
+		grid-template-columns: repeat(2, 4rem);
+	}
+
+	#bare-dice-section .die {
+		cursor: pointer;
+		margin: 1rem;
+	}
+
+	.rolling {
+		animation: roll 0.3s linear;
+	}
+
+	@keyframes roll {
+		0% {
+			transform: initial;
+		}
+		50% {
+			transform: rotate(180deg) scale(1.25);
+		}
+		100% {
+			transform: rotate(360deg) scale(1);
+		}
+	}
+
+	.board {
+		border-top: thick solid black;
+		border-left: thick solid red;
+		border-right: thin solid grey;
+		border-bottom: thin solid grey;
+		width: 16em;
+		height: 12em;
+		font-weight: bold;
+		display: grid;
+		grid-template-columns: repeat(8, 1fr);
+		grid-template-rows: repeat(6, 1fr);
+	}
+
+	.board > div {
+		border: thin solid grey;
+		display: grid;
+		align-items: center;
+		justify-items: center;
+		grid-template-columns: repeat(2, 1fr);
+		background-color: #DDD;
+	}
+
+	.board > div.disabled-quadrant {
+		background-color: #BBB;
+	}
+
+	.board > div.selected {
+		background-color: white;
+		z-index: 10;
+	}
+
+	.text.red {
+		color: red;
+		font-weight: bold;
+	}
+
+	.text.black {
+		color: black;
+		font-weight: bold;
+	}
+	</style>
+</head>
+<body>
+	<h1>Flashpoint Roller</h1>
+
+	<hr>
+	<h2 class="expand-control" id="bare-dice-header" aria-controls="bare-dice-section">
+		<span class="expand-icon">-</span>
+		Bare Dice
+	</h2>
+	<div id="bare-dice-section" class="section" aria-expanded="true">
+		<div class="die red" data-sides="6">6</div>
+		<div class="die black" data-sides="8">8</div>
+	</div>
+
+	<hr>
+	<h2 class="expand-control" id="coordinate-header" aria-controls="coordinate-section">
+		<span class="expand-icon">-</span>
+		Coordinates
+	</h2>
+	<div id="coordinate-section" class="section" aria-expanded="true">
+		<button id="roll-coordinate-button">Roll Coordinates</button>
+		<div class="board"></div>
+	</div>
+
+	<hr>
+	<h2 class="expand-control" id="deck-gun-header" aria-controls="deck-gun-section">
+		<span class="expand-icon">-</span>
+		Deck Gun
+	</h2>
+	<div id="deck-gun-section" class="section" aria-expanded="true">
+		<select id="choose-quadrant">
+			<option value="A">Quadrant A</option>
+			<option value="B">Quadrant B</option>
+			<option value="C">Quadrant C</option>
+			<option value="D">Quadrant D</option>
+		</select>
+		<button id="fire-deck-gun">Fire Deck Gun</button>
+		<div class="board"></div>
+	</div>
+<script>
+	main();
+
+	function main () {
+		populateBoards();
+		setUpEventListeners();
+	}
+
+	function populateBoards () {
+		Array.from(document.querySelectorAll(".board")).forEach(function (board) {
+			for (let i = 0; i < 48; i += 1) {
+				board.appendChild(document.createElement("div"));
+			}
+		});
+
+		selectDeckGunQuadrant();
+	}
+
+	function setUpEventListeners() {
+		// Section expand/collapse
+		Array.from(document.querySelectorAll(".expand-control")).forEach(function (control) {
+			let icon = control.querySelector(".expand-icon");
+			let section = document.getElementById(control.getAttribute("aria-controls"));
+			control.addEventListener("click", function() {
+				let currentlyExpanded = section.getAttribute("aria-expanded") === "true";
+				icon.textContent = currentlyExpanded ? "+" : "-";
+				section.setAttribute("aria-expanded", !currentlyExpanded);
+			});
+		});
+
+		// Bare dice
+		Array.from(document.querySelectorAll("#bare-dice-section .die")).forEach(function (die) {
+			var sides = parseInt(die.dataset.sides);
+			die.addEventListener("click", function () {
+				die.classList.add("rolling");
+				window.setTimeout(function () { die.textContent = roll(sides); }, 250);
+				window.setTimeout(function () { die.classList.remove("rolling"); }, 500);
+			});
+		});
+
+		// Coordinates
+		document.getElementById("roll-coordinate-button").addEventListener("click", function () {
+			Array.from(document.querySelectorAll("#coordinate-section .board > div.selected")).forEach(function (previous) {
+				previous.classList.remove("selected");
+				Array.from(previous.children).forEach(child => previous.removeChild(child));
+			});
+			let red = roll(6);
+			let black = roll(8);
+			let index = (red - 1) * 8 + black - 1
+			let cell = document.querySelectorAll("#coordinate-section .board > div")[index];
+			cell.classList.add("rolling", "selected");
+			const redCoord = document.createElement("span");
+			redCoord.classList.add("text", "red");
+			redCoord.textContent = red;
+			const blackCoord = document.createElement("span");
+			blackCoord.classList.add("text", "black");
+			blackCoord.textContent = black;
+			cell.appendChild(redCoord);
+			cell.appendChild(blackCoord);
+			window.setTimeout(function () { cell.classList.remove("rolling"); }, 500);
+		});
+
+		// Deck gun
+		document.getElementById("choose-quadrant").addEventListener("input", selectDeckGunQuadrant);
+		document.getElementById("fire-deck-gun").addEventListener("click", function () {
+			Array.from(document.querySelectorAll("#deck-gun-section .board > div.selected")).forEach(function (previous) {
+				previous.classList.remove("selected");
+				Array.from(previous.children).forEach(child => previous.removeChild(child));
+			});
+			const selectedQuadrant = document.getElementById("choose-quadrant").value;
+			let red = roll(6);
+			let black = roll(8);
+			let adjustedRed = (red > 3 && /[AC]/.test(selectedQuadrant)) ? 7 - red : red;
+			let adjustedBlack = (black > 4 && /[AB]/.test(selectedQuadrant)) ? 9 - black : black;
+			let index = (adjustedRed - 1) * 8 + adjustedBlack - 1
+			console.log([red, black, selectedQuadrant, adjustedRed, adjustedBlack, index]);
+			let cell = document.querySelectorAll("#deck-gun-section .board > div")[index];
+			cell.classList.add("rolling", "selected");
+			const redCoord = document.createElement("span");
+			redCoord.classList.add("text", "red");
+			redCoord.textContent = red;
+			const blackCoord = document.createElement("span");
+			blackCoord.classList.add("text", "black");
+			blackCoord.textContent = black;
+			cell.appendChild(redCoord);
+			cell.appendChild(blackCoord);
+			window.setTimeout(function () { cell.classList.remove("rolling"); }, 500);
+		});
+	}
+
+	function selectDeckGunQuadrant() {
+		const selectedQuadrant = document.getElementById("choose-quadrant").value;
+		Array.from(document.querySelectorAll("#deck-gun-section .board > div")).forEach(function (cell, i) {
+			let red = Math.floor(i / 8) + 1;
+			let black = i % 8 + 1;
+
+			let thisQuadrant;
+			if (red <= 3 && black <= 4) thisQuadrant = "A";
+			if (red <= 3 && black >= 5) thisQuadrant = "B";
+			if (red >= 4 && black <= 4) thisQuadrant = "C";
+			if (red >= 4 && black >= 5) thisQuadrant = "D";
+
+			if (thisQuadrant === selectedQuadrant) {
+				cell.classList.remove("disabled-quadrant");
+			}
+			else {
+				cell.classList.add("disabled-quadrant");
+			}
+		});
+	}
+
+	function roll (sides) {
+		// Suppose we wanted to roll a 6-sided die by generating a random (unsigned) 4-bit integer.
+		// The integer would be in the range [0, 15].
+		// If we take the integer modulo 6, we will get a number in [0, 5]...
+		// BUT 0, 1, 2, and 3 each have probability 3/16, whereas 4 and 5 have probability only 1/8 (that is, 2/16)
+		// To make it a fair roll, if our random 4-bit integer is greater than 11, we'll generate a new one.
+		// Now every outcome in the range [0, 5] is equally likely, at the cost of slightly-increased runtime.
+		// To reduce the chance of a re-roll, we will use a 32-bit integer.
+		// We will only need to re-generate if the random integer is at the very top of the range.
+		let array = new Uint32Array(1);
+		let maxFairValue = Math.floor(4294967295 / sides) * sides - 1;
+		do {
+			window.crypto.getRandomValues(array);
+		} while (array[0] > maxFairValue)
+		return array[0] % sides + 1;
+	}
+</script>
+</body>
+</html>
