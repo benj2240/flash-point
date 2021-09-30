@@ -219,8 +219,8 @@
 			const selectedQuadrant = document.getElementById("choose-quadrant").value;
 			let red = roll(6);
 			let black = roll(8);
-			let adjustedRed = (red > 3 && /[AC]/.test(selectedQuadrant)) ? 7 - red : red;
-			let adjustedBlack = (black > 4 && /[AB]/.test(selectedQuadrant)) ? 9 - black : black;
+			let adjustedRed = ((red > 3 && /[AB]/.test(selectedQuadrant)) || (red < 4 && /[CD]/.test(selectedQuadrant))) ? 7 - red : red;
+			let adjustedBlack = ((black > 4 && /[AC]/.test(selectedQuadrant)) || (black < 5 && /[BD]/.test(selectedQuadrant))) ? 9 - black : black;
 			let index = (adjustedRed - 1) * 8 + adjustedBlack - 1
 			console.log([red, black, selectedQuadrant, adjustedRed, adjustedBlack, index]);
 			let cell = document.querySelectorAll("#deck-gun-section .board > div")[index];
