@@ -45,9 +45,22 @@
 		background-color: purple;
 	}
 
-	#bare-dice-section {
+	.deck {
+		background-color: brown;
+		color: white;
+		/* height: 3rem; */
+		width: 10rem;
+		border: thin solid lightgrey;
+		border-radius: 0.5rem;
+		text-align: center;
 		display: grid;
-		grid-template-columns: repeat(3, 4rem);
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+	}
+
+	#bare-dice-section {
+		display: flex;
 	}
 
 	#bare-dice-section .die {
@@ -125,6 +138,7 @@
 		<div class="die red" data-sides="6">6</div>
 		<div class="die black" data-sides="8">8</div>
 		<div class="die purple" data-sides="12">12</div>
+		<div class="deck commendations">[Commendation]</div>
 	</div>
 
 	<hr>
@@ -189,12 +203,26 @@
 
 		// Bare dice
 		Array.from(document.querySelectorAll("#bare-dice-section .die")).forEach(function (die) {
-			var sides = parseInt(die.dataset.sides);
+			let sides = parseInt(die.dataset.sides);
 			die.addEventListener("click", function () {
 				die.classList.add("rolling");
 				window.setTimeout(function () { die.textContent = roll(sides); }, 250);
 				window.setTimeout(function () { die.classList.remove("rolling"); }, 500);
 			});
+		});
+
+		// Commendation deck
+		document.querySelector(".deck.commendations").addEventListener("click", function(evt) {
+			const cardNames = [
+				"Adrenaline (1)","Adrenaline (2)","Ambulance Call (3)","Ambulance Call (4)","Breather (5)","Breather (6)","Conscious (7)","Conscious (8)","Cool Down (9)","Cool Down (10)","Dodge (11)","Dodge (12)","Engine Call (13)","Engine Call (14)","Evac (15)","Evac (16)","False Report (17)","False Report (18)","Fire Blanket (19)","Fire Blanket (20)","First On the Scene (21)","First On the Scene (22)","Foam Bomb (23)","Foam Bomb (24)","Found One (25)","Found One (26)",
+				"Hold Together (27)","Hold Together (28)","Lucky Break (29)","Lucky Break (30)","Lumberjack (31)","Lumberjack (32)","Mobile Victim (33)","Mobile Victim (34)","Public Relations (35)","Public Relations (36)","Second Chance (37)","Second Chance (38)","Tag Team (39)","Tag Team (40)","Will To Live (41)","Will To Live (42)"
+			];
+			const index = roll(cardNames.length) - 1;
+			const card = cardNames[index];
+			const cardElement = evt.target;
+			cardElement.classList.add("rolling");
+			cardElement.innerText = card;
+			window.setTimeout(function () { cardElement.classList.remove("rolling"); }, 500);
 		});
 
 		// Coordinates
