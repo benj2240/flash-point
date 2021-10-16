@@ -34,6 +34,7 @@
 		align-items: center;
 		justify-content: center;
 		width: 3rem;
+		min-width: 3rem;
 		height: 3rem;
 	}
 
@@ -54,6 +55,8 @@
 		color: white;
 		font-weight: bold;
 		width: 10rem;
+		min-width: 10rem;
+		min-height: 3rem;
 		border: thin solid lightgrey;
 		border-radius: 0.5rem;
 		text-align: center;
@@ -66,6 +69,7 @@
 
 	#bare-dice-section {
 		display: flex;
+		flex-wrap: wrap;
 	}
 
 	#bare-dice-section .die {
@@ -216,7 +220,7 @@
 				window.setTimeout(function () { die.classList.remove("rolling"); }, 500);
 			});
 		});
-		
+
 		// Event deck
 		let eventRollRemoveHandle
 		document.querySelector(".deck.events").addEventListener("click", function (evt) {
