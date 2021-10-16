@@ -9,6 +9,10 @@
 		user-select: none;
 	}
 
+	.expand-control:hover {
+		background-color: #EEE;
+	}
+
 	.expand-icon {
 		font-family: monospace;
 	}
@@ -212,22 +216,9 @@
 				window.setTimeout(function () { die.classList.remove("rolling"); }, 500);
 			});
 		});
-
-		// Commendation deck
-		document.querySelector(".deck.commendations").addEventListener("click", function (evt) {
-			const cardNames = [
-				"Adrenaline (1)","Adrenaline (2)","Ambulance Call (3)","Ambulance Call (4)","Breather (5)","Breather (6)","Conscious (7)","Conscious (8)","Cool Down (9)","Cool Down (10)","Dodge (11)","Dodge (12)","Engine Call (13)","Engine Call (14)","Evac (15)","Evac (16)","False Report (17)","False Report (18)","Fire Blanket (19)","Fire Blanket (20)","First On the Scene (21)","First On the Scene (22)","Foam Bomb (23)",
-				"Foam Bomb (24)","Found One (25)","Found One (26)","Hold Together (27)","Hold Together (28)","Lucky Break (29)","Lucky Break (30)","Lumberjack (31)","Lumberjack (32)","Mobile Victim (33)","Mobile Victim (34)","Public Relations (35)","Public Relations (36)","Second Chance (37)","Second Chance (38)","Tag Team (39)","Tag Team (40)","Will To Live (41)","Will To Live (42)"
-			];
-			const index = roll(cardNames.length) - 1;
-			const card = cardNames[index];
-			const cardElement = evt.target;
-			cardElement.classList.add("rolling");
-			cardElement.innerText = card;
-			window.setTimeout(function () { cardElement.classList.remove("rolling"); }, 500);
-		});
-
+		
 		// Event deck
+		let eventRollRemoveHandle
 		document.querySelector(".deck.events").addEventListener("click", function (evt) {
 			const cardNames = [
 				"Backup EMT (1)","Blocked Hydrant (2)","Blowup (3)","Busy Streets (4)","Clear Roads (5)","Could Be Trouble (6)","Crazy Cat Lady (7)","Dalayed Ambulance (8)","Downpour (9)","Early Casualty (10)","Empty (11)","Full House (12)","Hidden (13)","Meth Lab (14)","No Event (15)","No Event (16)","No Event (17)","No Event (18)","No Event (19)","One Got Out (20)","Opportunity (21)","Out Sick (22)",
@@ -238,7 +229,28 @@
 			const cardElement = evt.target;
 			cardElement.classList.add("rolling");
 			cardElement.innerText = card;
-			window.setTimeout(function () { cardElement.classList.remove("rolling"); }, 500);
+			if (eventRollRemoveHandle) {
+				window.clearInterval(eventRollRemoveHandle);
+			}
+			eventRollRemoveHandle = window.setTimeout(function () { cardElement.classList.remove("rolling"); }, 500);
+		});
+
+		// Commendation deck
+		let commendationRollRemoveHandle;
+		document.querySelector(".deck.commendations").addEventListener("click", function (evt) {
+			const cardNames = [
+				"Adrenaline (1)","Adrenaline (2)","Ambulance Call (3)","Ambulance Call (4)","Breather (5)","Breather (6)","Conscious (7)","Conscious (8)","Cool Down (9)","Cool Down (10)","Dodge (11)","Dodge (12)","Engine Call (13)","Engine Call (14)","Evac (15)","Evac (16)","False Report (17)","False Report (18)","Fire Blanket (19)","Fire Blanket (20)","First On the Scene (21)","First On the Scene (22)","Foam Bomb (23)",
+				"Foam Bomb (24)","Found One (25)","Found One (26)","Hold Together (27)","Hold Together (28)","Lucky Break (29)","Lucky Break (30)","Lumberjack (31)","Lumberjack (32)","Mobile Victim (33)","Mobile Victim (34)","Public Relations (35)","Public Relations (36)","Second Chance (37)","Second Chance (38)","Tag Team (39)","Tag Team (40)","Will To Live (41)","Will To Live (42)"
+			];
+			const index = roll(cardNames.length) - 1;
+			const card = cardNames[index];
+			const cardElement = evt.target;
+			cardElement.classList.add("rolling");
+			cardElement.innerText = card;
+			if (commendationRollRemoveHandle) {
+				window.clearInterval(commendationRollRemoveHandle);
+			}
+			commendationRollRemoveHandle = window.setTimeout(function () { cardElement.classList.remove("rolling"); }, 500);
 		});
 
 		// Coordinates
